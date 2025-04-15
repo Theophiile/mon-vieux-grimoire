@@ -20,7 +20,7 @@ exports.signup = async (req, res) => {
 
     // 4. Création de l'utilisateur
     const user = new User({
-      email: req.body.email.toLowerCase().trim(), // Normalisation de l'email
+      email: req.body.email.toLowerCase().trim(),
       password: hash,
     });
 
@@ -49,7 +49,7 @@ exports.login = async (req, res) => {
       email: req.body.email.toLowerCase().trim(),
     });
     if (!user) {
-      return res.status(401).json({ message: "Identifiants incorrects" }); // Message générique pour la sécurité
+      return res.status(401).json({ message: "Identifiants incorrects" });
     }
 
     // 3. Comparaison du mot de passe
@@ -58,7 +58,7 @@ exports.login = async (req, res) => {
       user.password
     );
     if (!validPassword) {
-      return res.status(401).json({ message: "Identifiants incorrects" }); // Même message que ci-dessus
+      return res.status(401).json({ message: "Identifiants incorrects" });
     }
 
     // 4. Génération du token
@@ -70,10 +70,64 @@ exports.login = async (req, res) => {
     res.status(200).json({
       userId: user._id,
       token,
-      expiresIn: 86400, // 24h en secondes
+      expiresIn: 86400,
     });
   } catch (error) {
     console.error("Erreur lors de la connexion:", error);
     res.status(500).json({ message: "Erreur serveur lors de la connexion" });
+  }
+};
+
+// Nouvelle fonction pour récupérer le profil utilisateur
+exports.getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    res.status(200).json({
+      email: user.email,
+      profileImage: user.profileImage || null,
+      userId: user._id,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la récupération du profil:", error);
+    res
+      .status(500)
+      .json({ message: "Erreur serveur lors de la récupération du profil" });
+  }
+};
+
+// Nouvelle fonction pour mettre à jour le profil utilisateur
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Vérifier si l'utilisateur existe
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    // Mettre à jour l'image de profil si elle est fournie
+    if (req.file) {
+      user.profileImage = `${req.protocol}://${req.get("host")}/images/${
+        req.file.filename
+      }`;
+      await user.save();
+    }
+
+    res.status(200).json({
+      message: "Profil mis à jour avec succès",
+      profileImage: user.profileImage || null,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du profil:", error);
+    res
+      .status(500)
+      .json({ message: "Erreur serveur lors de la mise à jour du profil" });
   }
 };

@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-mongoose.set("strictQuery", false);
 const path = require("path");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");

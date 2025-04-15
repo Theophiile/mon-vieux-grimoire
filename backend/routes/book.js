@@ -4,24 +4,24 @@ const auth = require("../middleware/auth");
 const { upload, optimizeImage } = require("../middleware/multer-config");
 const bookCtrl = require("../controllers/book");
 
+// Route POST corrigée
 router.post(
   "/",
   auth,
   (req, res, next) => {
-    if (req.headers["content-type"]?.startsWith("multipart/form-data")) {
-      return upload.single("image")(req, res, () => {
-        bookCtrl.createBook(req, res, next);
-      });
-    }
-    next();
+    upload(req, res, (err) => {
+      if (err) return next(err);
+      next();
+    });
   },
+  optimizeImage,
   bookCtrl.createBook
 );
 
+// Autres routes...
 router.get("/", bookCtrl.getAllBooks);
 router.get("/bestrating", bookCtrl.getBestRating);
 router.get("/:id", bookCtrl.getOneBook);
-router.post("/", auth, upload, optimizeImage, bookCtrl.createBook);
 router.put("/:id", auth, upload, optimizeImage, bookCtrl.modifyBook);
 router.delete("/:id", auth, bookCtrl.deleteBook);
 router.post("/:id/rating", auth, bookCtrl.rateBook);
