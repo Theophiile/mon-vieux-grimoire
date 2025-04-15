@@ -1,0 +1,14 @@
+# Fichiers sensibles
+.env
+node_modules/
+/images
+
+# Fichiers système
+.DS_Store
+
+# Fichiers de logs
+*.log
+
+# IDE
+.vscode/
+.idea/
