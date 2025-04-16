@@ -68,7 +68,14 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Gestion des images
-app.use("/images", express.static(path.join(__dirname, "images")));
+app.use(
+  "/images",
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin"); // 👈 important
+    next();
+  },
+  express.static(path.join(__dirname, "images"))
+);
 
 // Routes
 app.use("/api/books", bookRoutes);

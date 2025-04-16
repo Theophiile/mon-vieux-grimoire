@@ -129,11 +129,12 @@ exports.deleteBook = async (req, res, next) => {
   }
 };
 
-exports.rateBook = async (req, res, next) => {
+exports.rateBook = async (req, res) => {
   try {
     const { rating } = req.body;
     const userId = req.user.userId;
 
+    // Validation de la note
     if (rating < 0 || rating > 5) {
       return res
         .status(400)
@@ -143,6 +144,14 @@ exports.rateBook = async (req, res, next) => {
     const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ message: "Livre non trouvé" });
 
+    // Empêche l'auteur de noter son propre livre
+    if (book.userId.toString() === userId) {
+      return res
+        .status(403)
+        .json({ message: "Vous ne pouvez pas noter votre propre livre" });
+    }
+
+    // Vérifie si l'utilisateur a déjà noté
     const existingRating = book.ratings.find(
       (r) => r.userId.toString() === userId
     );
@@ -150,6 +159,7 @@ exports.rateBook = async (req, res, next) => {
       return res.status(400).json({ message: "Vous avez déjà noté ce livre" });
     }
 
+    // Ajoute la note et calcule la moyenne
     book.ratings.push({ userId, grade: rating });
     book.averageRating =
       book.ratings.reduce((sum, r) => sum + r.grade, 0) / book.ratings.length;
