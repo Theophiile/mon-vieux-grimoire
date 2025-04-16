@@ -4,7 +4,6 @@ const auth = require("../middleware/auth");
 const { upload, optimizeImage } = require("../middleware/multer-config");
 const bookCtrl = require("../controllers/book");
 
-// Route POST corrigée
 router.post(
   "/",
   auth,
@@ -18,7 +17,6 @@ router.post(
   bookCtrl.createBook
 );
 
-// Autres routes...
 router.get("/", bookCtrl.getAllBooks);
 router.get("/bestrating", bookCtrl.getBestRating);
 router.get("/:id", bookCtrl.getOneBook);

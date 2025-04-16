@@ -1,3 +1,4 @@
+const { log } = require("console");
 const Book = require("../models/Book");
 const fs = require("fs");
 
@@ -147,7 +148,7 @@ exports.rateBook = async (req, res) => {
     // Empêche l'auteur de noter son propre livre
     if (book.userId.toString() === userId) {
       return res
-        .status(403)
+        .status(401)
         .json({ message: "Vous ne pouvez pas noter votre propre livre" });
     }
 
