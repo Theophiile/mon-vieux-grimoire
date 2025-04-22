@@ -34,15 +34,29 @@ exports.getBestRating = (req, res, next) => {
 
 exports.createBook = async (req, res) => {
   try {
-    // Récupération des données selon le format
     const bookData = req.body.book ? JSON.parse(req.body.book) : req.body;
+    const userId = req.user.userId;
 
-    // Validation minimale
     if (!bookData.title || !bookData.author) {
       if (req.file) fs.unlinkSync(req.file.path);
       return res
         .status(400)
         .json({ message: "Le titre et l'auteur sont requis" });
+    }
+
+    let ratings = [];
+    let averageRating = 0;
+
+    if (bookData.rating) {
+      const grade = Math.min(5, Math.max(0, parseInt(bookData.rating, 10)));
+      ratings.push({ userId, grade });
+      averageRating = grade;
+    }
+
+    if (Array.isArray(bookData.ratings) && bookData.ratings.length > 0) {
+      ratings = bookData.ratings;
+      const total = ratings.reduce((sum, r) => sum + r.grade, 0);
+      averageRating = total / ratings.length;
     }
 
     const newBook = new Book({
@@ -51,8 +65,8 @@ exports.createBook = async (req, res) => {
       imageUrl: req.file
         ? `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
         : null,
-      ratings: [],
-      averageRating: 0,
+      ratings,
+      averageRating,
     });
 
     const savedBook = await newBook.save();
