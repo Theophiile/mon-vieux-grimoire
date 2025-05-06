@@ -1,5 +1,5 @@
 const { log } = require("console");
-const Book = require("../models/Book");
+const Book = require("../models/book");
 const fs = require("fs");
 
 // Helper pour supprimer les fichiers

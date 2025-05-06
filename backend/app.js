@@ -51,7 +51,14 @@ app.use(express.json());
 // Configuration CORS pour le front-end
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: function (origin, callback) {
+      const allowedOrigins = process.env.FRONTEND_URL.split(","); // Sépare les origines
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true); // Si l'origine est autorisée, continue
+      } else {
+        callback(new Error("CORS not allowed"), false); // Si l'origine n'est pas autorisée, renvoie une erreur
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

@@ -10,3 +10,4 @@ frontend/.DS_Store
 
 # Général
 .DS_Store
+node_modules
